@@ -3,8 +3,6 @@ import type { Request, Response } from 'express';
 
 const createUser = async (req: Request, res: Response) => {
   const request = req.body;
-  console.log(req.body);
-  // console.log(request);
   try {
     const user = await userService.createUser(request);
     res.status(200).json(user);
@@ -42,4 +40,14 @@ const getUser = async (req: Request, res: Response) => {
   }
 };
 
-export default { createUser, loginUser, logoutUser, getUser };
+const getUserProfile = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  try {
+    const user = await userService.getUserProfile(userId);
+    res.status(200).json(user);
+  } catch (error: any) {
+    res.status(400).json({ error });
+  }
+};
+
+export default { createUser, loginUser, logoutUser, getUser, getUserProfile };

@@ -9,7 +9,7 @@ import {
 import { getAuth } from 'firebase/auth';
 import { ApiResponse } from '../types/common';
 import { SignInResponse, SignUpRequest, UserInfo } from '../types/user';
-import { ref, set } from 'firebase/database';
+import { ref, set, get } from 'firebase/database';
 
 const createUser = async (request: SignUpRequest) => {
   const { email, password, ...info } = request;
@@ -85,4 +85,18 @@ const setUserProfile = async (request: UserInfo) => {
   }
 };
 
-export default { createUser, signInUser, signOutUser, getAuthStateChange, getAuthUser, setUserProfile };
+const getUserProfile = async (userId: string) => {
+  try {
+    const userRef = ref(db, `user/${userId}`);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      return snapshot.val(); // 返回獲取到的數據
+    } else {
+      throw new Error('User not found'); // 這裡拋出錯誤，如果沒有找到用戶
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default { createUser, signInUser, signOutUser, getAuthStateChange, getAuthUser, setUserProfile, getUserProfile };
