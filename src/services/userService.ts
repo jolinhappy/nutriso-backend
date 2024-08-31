@@ -7,8 +7,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
-import { ApiResponse } from '../types/common';
-import { SignInResponse, SignUpRequest, UserInfo } from '../types/user';
+import { SignUpRequest, UserInfo } from '../types/user';
 import { ref, set, get } from 'firebase/database';
 
 const createUser = async (request: SignUpRequest) => {
@@ -23,7 +22,7 @@ const createUser = async (request: SignUpRequest) => {
     };
     setUserProfile(userInfo);
   } catch (error) {
-    console.error('Error creating user:', error);
+    throw error;
   }
 };
 
@@ -45,15 +44,11 @@ const signInUser = async (email: string, password: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user: User = userCredential.user;
-    const response: ApiResponse<SignInResponse | null> = {
-      code: 200,
-      message: 'Success',
-    };
+    const accessToken = await user.getIdToken();
     if (user) {
-      // getAuthStateChange();
-      const userToken = await user.getIdToken();
-
-      return response;
+      return {
+        accessToken,
+      };
     }
   } catch (error) {
     throw error;

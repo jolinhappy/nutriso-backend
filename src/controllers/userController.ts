@@ -1,11 +1,17 @@
 import userService from '../services/userService';
 import type { Request, Response } from 'express';
+import { ApiResponse } from '../types/common';
+import { SignInResponse } from '../types/user';
 
 const createUser = async (req: Request, res: Response) => {
   const request = req.body;
   try {
     const user = await userService.createUser(request);
-    res.status(200).json(user);
+    const response: ApiResponse<SignInResponse | null> = {
+      code: 200,
+      message: 'Success',
+    };
+    res.status(200).json(response);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
@@ -14,10 +20,21 @@ const createUser = async (req: Request, res: Response) => {
 const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
-    const user = await userService.signInUser(email, password);
-    res.status(200).json(user);
+    const userAccessToken = await userService.signInUser(email, password);
+    if (userAccessToken) {
+      const response: ApiResponse<SignInResponse | null | any> = {
+        code: 200,
+        message: 'Success',
+        data: userAccessToken,
+      };
+      res.status(200).json(response);
+    }
   } catch (error: any) {
-    res.status(400).json({ error: error.code });
+    const errorResponse: ApiResponse<null> = {
+      code: 401,
+      message: error.code,
+    };
+    res.status(400).json(errorResponse);
   }
 };
 
